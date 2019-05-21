@@ -4699,8 +4699,23 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
                 MarkIniSettingsDirty(window);
         }
 
+		auto snap = [=](float value, float snap_threshold) -> float {
+			float modulo = fmodf(value, snap_threshold);
+			float moduloRatio = fabsf(modulo) / snap_threshold;
+			if (moduloRatio < 0.5f)
+				value -= modulo;
+			else if (moduloRatio > (1.f - 0.5f))
+				value = value - modulo + snap_threshold * ((value < 0.f) ? -1.f : 1.f);
+			return value;
+		};
+
         // Apply minimum/maximum window size constraints and final size
         window->SizeFull = CalcSizeAfterConstraint(window, window->SizeFull);
+		ImVec2 size = window->SizeFull;
+		float sizex = snap(size.x, 16.f);
+		float sizey = snap(size.y, 16.f);
+		window->SizeFull = ImVec2(sizex, sizey);
+
         window->Size = window->Collapsed && !(flags & ImGuiWindowFlags_ChildWindow) ? window->TitleBarRect().GetSize() : window->SizeFull;
 
         // SCROLLBAR STATUS
@@ -4758,6 +4773,10 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
             }
         }
         window->Pos = ImFloor(window->Pos);
+		ImVec2 p = window->Pos;
+		float x = snap(p.x, 32.f);
+		float y = snap(p.y, 32.f);
+		window->Pos = ImFloor(ImVec2(x, y));
 
         // Lock window rounding for the frame (so that altering them doesn't cause inconsistencies)
         window->WindowRounding = (flags & ImGuiWindowFlags_ChildWindow) ? style.ChildRounding : ((flags & ImGuiWindowFlags_Popup) && !(flags & ImGuiWindowFlags_Modal)) ? style.PopupRounding : style.WindowRounding;
