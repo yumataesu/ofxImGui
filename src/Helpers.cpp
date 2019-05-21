@@ -173,24 +173,10 @@ void ofxImGui::EndTree(Settings& settings)
 }
 
 //--------------------------------------------------------------
-void ofxImGui::AddGroup(ofParameterGroup& group, Settings& settings)
+void ofxImGui::AddGroup(ofParameterGroup& group, Settings& settings) 
 {
-	bool prevWindowBlock = settings.windowBlock;
-	if (settings.windowBlock)
-	{
-		if (!ofxImGui::BeginTree(group, settings))
-		{
-			return;
-		}
-	}
-	else
-	{
-		if (!ofxImGui::BeginWindow(group.getName().c_str(), settings))
-		{
-			ofxImGui::EndWindow(settings);
-			return;
-		}
-	}
+	// Push a new list of names onto the stack.
+	windowOpen.usedNames.push(std::vector<std::string>());
 
 	for (auto parameter : group)
 	{
@@ -269,17 +255,11 @@ void ofxImGui::AddGroup(ofParameterGroup& group, Settings& settings)
 
 		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
 	}
+	// Unlink the referenced ofParameter.
+	windowOpen.parameter.reset();
 
-	if (settings.windowBlock && !prevWindowBlock)
-	{
-		// End window if we created it.
-		ofxImGui::EndWindow(settings);
-	}
-	else
-	{
-		// End tree.
-		ofxImGui::EndTree(settings);
-	}
+	// Clear the list of names from the stack.
+	windowOpen.usedNames.pop();
 }
 
 #if OF_VERSION_MINOR >= 10
