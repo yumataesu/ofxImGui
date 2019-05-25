@@ -173,7 +173,7 @@ void ofxImGui::EndTree(Settings& settings)
 }
 
 //--------------------------------------------------------------
-void ofxImGui::AddGroup(ofParameterGroup& group, Settings& settings) 
+void ofxImGui::AddGroup(ofParameterGroup& group) 
 {
 	// Push a new list of names onto the stack.
 	windowOpen.usedNames.push(std::vector<std::string>());
@@ -185,7 +185,7 @@ void ofxImGui::AddGroup(ofParameterGroup& group, Settings& settings)
 		if (parameterGroup)
 		{
 			// Recurse through contents.
-			ofxImGui::AddGroup(*parameterGroup, settings);
+			ofxImGui::AddGroup(*parameterGroup);
 			continue;
 		}
 
